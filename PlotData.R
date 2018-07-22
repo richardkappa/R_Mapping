@@ -1,3 +1,11 @@
+install.packages("rgdal")
+install.packages("rgeos")
+install.packages("maptools")
+install.packages("ggplot2")
+install.packages("plyr")
+install.packages("dplyr")
+install.packages("igraph")
+
 require("rgdal")
 require("rgeos")
 require("maptools")
@@ -5,8 +13,6 @@ require("ggplot2")
 require("plyr")
 require("dplyr")
 require("igraph")
-
-setwd("h:/desktop/Learning Networks/Shapefile eg/")
 
 #Get the shapefile
 shape <- readOGR(dsn = ".", layer = "EX_Sample")
