@@ -1,11 +1,3 @@
-install.packages("rgdal")
-install.packages("rgeos")
-install.packages("maptools")
-install.packages("ggplot2")
-install.packages("plyr")
-install.packages("dplyr")
-install.packages("igraph")
-
 require("rgdal")
 require("rgeos")
 require("maptools")
@@ -17,16 +9,17 @@ require("igraph")
 #Get the shapefile
 shape <- readOGR(dsn = ".", layer = "EX_Sample")
 
-shape2 <- shape[]
+#Remove vertical streets
+PC_Shape <- subset(shape, substr(shape$POSTCODE, 1, 2)==shape$PC_AREA)
 
-Postcodes <- shape@data
+Postcodes <- PC_Shape@data
 Postcodes$ID <- seq.int(nrow(Postcodes))
 
 #Plot it
-plot(shape)
+plot(PC_Shape)
 
 #Find which postcodes border which other postcodes
-tBoundaries <- gTouches(shape, byid=TRUE, returnDense = FALSE)
+tBoundaries <- gTouches(PC_Shape, byid=TRUE, returnDense = FALSE)
 
 #Set up a blank data frame
 Boundaries <- data.frame(PC1=integer(), PC2=integer())
