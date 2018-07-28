@@ -47,14 +47,14 @@ Lreg <- subset(Lreg,select=columns)
 
 #Create some new factors
 Lreg$Flat <- ifelse(Lreg$Property_Type=="F" & Lreg$SaleType == "A",1,0)
-Lreg$Detached <- ifelse(Lreg$Property_Type=="D" & Lreg$SaleType = "A",1,0)
-Lreg$SemiDetached <- ifelse(Lreg$Property_Type=="S" & Lreg$SaleType = "A",1,0)
-Lreg$Terraced <- ifelse(Lreg$Property_Type=="T" & Lreg$SaleType = "A",1,0)
-Lreg$OtherHouse <- ifelse(Lreg$Property_Type=="O" & Lreg$SaleType = "A",1,0)
-Lreg$NewBuild <- ifelse(Lreg$Old_New=="Y" & Lreg$SaleType = "A",1,0)
-Lreg$Leasehold <- ifelse(Lreg$Duration=="L" & Lreg$SaleType = "A",1,0)
-Lreg$Freehold <- ifelse(Lreg$Duration=="F" & Lreg$SaleType = "A",1,0)
-Lreg$AdditionalPricePaid <- ifelse(Lreg$SaleType = "B",1,0)
+Lreg$Detached <- ifelse(Lreg$Property_Type=="D" & Lreg$SaleType == "A",1,0)
+Lreg$SemiDetached <- ifelse(Lreg$Property_Type=="S" & Lreg$SaleType == "A",1,0)
+Lreg$Terraced <- ifelse(Lreg$Property_Type=="T" & Lreg$SaleType == "A",1,0)
+Lreg$OtherHouse <- ifelse(Lreg$Property_Type=="O" & Lreg$SaleType == "A",1,0)
+Lreg$NewBuild <- ifelse(Lreg$Old_New=="Y" & Lreg$SaleType == "A",1,0)
+Lreg$Leasehold <- ifelse(Lreg$Duration=="L" & Lreg$SaleType == "A",1,0)
+Lreg$Freehold <- ifelse(Lreg$Duration=="F" & Lreg$SaleType == "A",1,0)
+Lreg$AdditionalPricePaid <- ifelse(Lreg$SaleType == "B",1,0)
 
 Lreg$Flat.Price <- Lreg$Flat * Lreg$Price
 Lreg$Detached.Price <- Lreg$Detached * Lreg$Price
@@ -113,3 +113,4 @@ Keep <- c("Postcode_ns", "Sales", "AveragePrice", "Flat", "Flat.AvPrice",
 
 Lreg.Lookup <- Lreg.Lookup[,Keep]
 
+PC.Lookup2 <- left_join(PC.Lookup, Lreg.Lookup, by="Postcode_ns")
