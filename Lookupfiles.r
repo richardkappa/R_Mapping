@@ -113,4 +113,4 @@ Keep <- c("Postcode_ns", "Sales", "AveragePrice", "Flat", "Flat.AvPrice",
 
 Lreg.Lookup <- Lreg.Lookup[,Keep]
 
-PC.Lookup2 <- left_join(PC.Lookup, Lreg.Lookup, by="Postcode_ns")
+PC.Lookup <- left_join(PC.Lookup, Lreg.Lookup, by="Postcode_ns")
