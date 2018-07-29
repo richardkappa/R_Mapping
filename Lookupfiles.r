@@ -5,19 +5,80 @@ library('readr')
 library('dplyr')
 
 #Get the ONS postcode file
-PC.Lookup <- read_csv("~/NSPL_MAY_2018_UK.csv")
+nspl.root <- "h:/desktop/Learning Networks/ONS"
+
+nspl.nm <- "Data/NSPL_MAY_2018_UK.csv"
+nspl.nm <- paste(nspl.root,nspl.nm, sep="/")
+
+PC.Lookup <- read_csv(nspl.nm)
 
 #Create new postcode column without spaces
 PC.Lookup$Postcode_ns <- gsub(" ","",PC.Lookup$pcd,fixed=TRUE)
 
 Keep <- c("Postcode_ns", "ru11ind", "oseast1m", "osnrth1m", "ctry", "rgn", "laua", "pcon", "ttwa", "park", "lsoa11", "msoa11", "pfa", "imd")
-Names <- c("Postcode_ns", "RuralIndicator", "Easting", "Northing", "CountryCode", "RegionCode", "LAUA", "PCON", "TTWA", "PARK", "LSOA11", "MSOA11", "PFA", "IMD")
 PC.Lookup <- PC.Lookup[Keep]
+
+#Import and merge on the lookup files
+Country.nm <- "Documents/Country names and codes UK as at 08_12.csv"
+Country.nm <- paste(nspl.root,Country.nm, sep="/")
+Country.Lookup <- read_csv(Country.nm)
+PC.Lookup <- left_join(PC.Lookup, Country.Lookup[c("CTRY12CD", "CTRY12NM")], by=c("ctry" = "CTRY12CD"))
+
+Region.nm <- "Documents/Region names and codes EN as at 12_10 (GOR).csv"
+Region.nm <- paste(nspl.root,Region.nm, sep="/")
+Region.Lookup <- read_csv(Region.nm)
+PC.Lookup <- left_join(PC.Lookup, Region.Lookup[c("GOR10CD", "GOR10NM")], by=c("rgn" = "GOR10CD"))
+
+Laua.nm <- "Documents/LA_UA names and codes UK as at 12_16.csv"
+Laua.nm <- paste(nspl.root,Laua.nm, sep="/")
+Laua.Lookup <- read_csv(Laua.nm)
+PC.Lookup <- left_join(PC.Lookup, Laua.Lookup[c("LAD16CD", "LAD16NM")], by=c("laua" = "LAD16CD"))
+
+West.nm <- "Documents/Westminster Parliamentary Constituency names and codes UK as at 12_14.csv"
+West.nm <- paste(nspl.root,West.nm, sep="/")
+West.Lookup <- read_csv(West.nm)
+PC.Lookup <- left_join(PC.Lookup, West.Lookup[c("PCON14CD", "PCON14NM")], by=c("pcon" = "PCON14CD"))
+
+Park.nm <- "Documents/National Park names and codes GB as at 08_16.csv"
+Park.nm <- paste(nspl.root,Park.nm, sep="/")
+Park.Lookup <- read_csv(Park.nm)
+PC.Lookup <- left_join(PC.Lookup, Park.Lookup[c("NPARK16CD", "NPARK16NM")], by=c("park" = "NPARK16CD"))
+
+LSOA.nm <- "Documents/LSOA (2011) names and codes UK as at 12_12.csv"
+LSOA.nm <- paste(nspl.root,LSOA.nm, sep="/")
+LSOA.Lookup <- read_csv(LSOA.nm)
+PC.Lookup <- left_join(PC.Lookup, LSOA.Lookup[c("LSOA11CD", "LSOA11NM")], by=c("lsoa11" = "LSOA11CD"))
+
+MSOA.nm <- "Documents/MSOA (2011) names and codes UK as at 12_12.csv"
+MSOA.nm <- paste(nspl.root,MSOA.nm, sep="/")
+MSOA.Lookup <- read_csv(MSOA.nm)
+PC.Lookup <- left_join(PC.Lookup, MSOA.Lookup[c("MSOA11CD", "MSOA11NM")], by=c("msoa11" = "MSOA11CD"))
+
+Police.nm <- "Documents/PFA names and codes GB as at 12_15.csv"
+Police.nm <- paste(nspl.root,Police.nm, sep="/")
+Police.Lookup <- read_csv(Police.nm)
+PC.Lookup <- left_join(PC.Lookup, Police.Lookup[c("PFA15CD", "PFA15NM")], by=c("pfa" = "PFA15CD"))
+
+TTWA.nm <- "Documents/TTWA names and codes UK as at 12_11 v5.csv"
+TTWA.nm <- paste(nspl.root,TTWA.nm, sep="/")
+TTWA.Lookup <- read_csv(TTWA.nm)
+PC.Lookup <- left_join(PC.Lookup, TTWA.Lookup[c("TTWA11CD", "TTWA11NM")], by=c("ttwa" = "TTWA11CD"))
+
+Keep <- c("Postcode_ns", "ru11ind", "oseast1m", "osnrth1m", "CTRY12NM", "GOR10NM", "LAD16NM", "PCON14NM", "TTWA11NM", "NPARK16NM", "LSOA11NM", "MSOA11NM", "PFA15NM")
+Names <- c("Postcode_ns", "RuralIndicator", "Easting", "Northing", "Country", "Region", "LocalAuthority", "WestminsterConstituencies", "TravelToWorkArea", "NationalPark", "LowerLayerSuperOutputArea", "MiddleLayerSuperOutputArea", "PoliceForceArea")
+
+PC.Lookup<-PC.Lookup[, Keep]
 names(PC.Lookup) <- Names
 
+#Clean up the files a bit
+rm(nspl.nm, nspl.root, Keep, Names ,Country.nm, Region.nm, Laua.nm, West.nm, Park.nm, LSOA.nm, MSOA.nm, Police.nm, TTWA.nm,
+   Country.Lookup, Region.Lookup, Laua.Lookup, West.Lookup, Park.Lookup, LSOA.Lookup, MSOA.Lookup, Police.Lookup, TTWA.Lookup)
 
+#Now for the Land registry data
+ds <- "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-2016.csv"
+Names <- c('Transaction_unique_identifier', 'Price', 'Date_of_Transfer', 'Postcode', 'Property_Type', 'Old_New', 'Duration', 'PAON', 'SAON', 'Street', 'Locality', 'Town_City', 'District', 'County', 'SaleType', 'Record_Status_monthly_file_only')
+Lreg2016  <- read_csv(ds, col_names=Names)
 
-# The URL of the Land Registry data
 ds <- "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-2017.csv"
 Names <- c('Transaction_unique_identifier', 'Price', 'Date_of_Transfer', 'Postcode', 'Property_Type', 'Old_New', 'Duration', 'PAON', 'SAON', 'Street', 'Locality', 'Town_City', 'District', 'County', 'SaleType', 'Record_Status_monthly_file_only')
 Lreg2017  <- read_csv(ds, col_names=Names)
@@ -26,7 +87,7 @@ ds <- "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws
 Names <- c('Transaction_unique_identifier', 'Price', 'Date_of_Transfer', 'Postcode', 'Property_Type', 'Old_New', 'Duration', 'PAON', 'SAON', 'Street', 'Locality', 'Town_City', 'District', 'County', 'SaleType', 'Record_Status_monthly_file_only')
 Lreg2018  <- read_csv(ds, col_names=Names)
 
-Lreg <- rbind(Lreg2017, Lreg2018)
+Lreg <- rbind(Lreg2016, Lreg2017, Lreg2018)
 
 Lreg$Postcode_ns <- gsub(" ", "", Lreg$Postcode, fixed = TRUE)
 
@@ -35,9 +96,10 @@ Lreg$Transfer_Date <- as.Date(as.POSIXct(Lreg$Date_of_Transfer,tz="", "%Y-%m-%d 
 Lreg$Transfer_Month <- as.Date(paste((format(Lreg$Transfer_Date, "%Y-%m")),"-01",sep=""))
 Lreg$Transfer_Year <- as.numeric(format(Lreg$Transfer_Date, "%Y"))
 
-#I want just sales from in or after 2017 and the postcode needs to exist
-Lreg <- Lreg[ which(Lreg$Transfer_Year>=2017), ]
+#I want just sales from in or after 2016 and the postcode needs to exist
+Lreg <- Lreg[ which(Lreg$Transfer_Year>=2016), ]
 Lreg <- Lreg[ !is.na(Lreg$Postcode), ]
+
 #Remove rows where the value is over £2M, houses can cost this much but so can supermarkets and office blocks
 Lreg <- Lreg[!(Lreg$Price>2000000),]
 
@@ -65,7 +127,6 @@ Lreg$NewBuild.Price <- Lreg$NewBuild * Lreg$Price
 Lreg$Leasehold.Price <- Lreg$Leasehold * Lreg$Price
 Lreg$Freehold.Price <- Lreg$Freehold * Lreg$Price
 Lreg$AdditionalPricePaid.Price <- Lreg$AdditionalPricePaid * Lreg$Price
-
 
 #Summarise the data by postcode
 
@@ -106,10 +167,10 @@ Lreg.Lookup$Freehold.AvPrice <- Lreg.Lookup$Freehold.PriceT / Lreg.Lookup$Freeho
 Lreg.Lookup$AdditionalPricePaid.AvPrice <- Lreg.Lookup$AdditionalPricePaid.PriceT / Lreg.Lookup$AdditionalPricePaid
 
 Keep <- c("Postcode_ns", "Sales", "AveragePrice", "Flat", "Flat.AvPrice",
-             "Detached", "Detached.AvPrice", "SemiDetached", "SemiDetached.AvPrice",
-             "Terraced", "Terraced.AvPrice", "OtherHouse", "OtherHouse.AvPrice",
-             "NewBuild", "NewBuild.AvPrice", "Leasehold", "Leasehold.AvPrice",
-             "Freehold", "Freehold.AvPrice", "AdditionalPricePaid.AvPrice", "AdditionalPricePaid")
+          "Detached", "Detached.AvPrice", "SemiDetached", "SemiDetached.AvPrice",
+          "Terraced", "Terraced.AvPrice", "OtherHouse", "OtherHouse.AvPrice",
+          "NewBuild", "NewBuild.AvPrice", "Leasehold", "Leasehold.AvPrice",
+          "Freehold", "Freehold.AvPrice", "AdditionalPricePaid.AvPrice", "AdditionalPricePaid")
 
 Lreg.Lookup <- Lreg.Lookup[,Keep]
 
